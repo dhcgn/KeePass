@@ -1,2 +1,18 @@
 language: csharp
 solution: KeePass.sln
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "HQ+6wQ9QLpBvlzbxgTPfLe5MsG3w1OOsjoQ3lipX6VUfI0JLHz887T7jCXzZMncrGcca2p4x1NvJA/iSgTSM66s+WaxxtZWtdcjkgvE704t8STu29w9BZNaBgmf/uDuIa4SxRVeyidF2PqNJyLFBYIINWuF9c5JIsrrZ+erMY0N074obBMypm5toE9/h3Hs7M4L3IUc4b24NWfSoUKOW9iRkUsC11D9Heg9wor/yE7LB+Vet81JRJZKa0hbICNkcI0ycaMbLm9NMw0RR8yS7wG0eC7ctIP9P4cZr3HqIud4DZKSYmokJ9vr5bSZlzjC4TnrWUmZS0M10S4VhMF/yaJGZWocsquYoNunFULJJsWq5RgtUMuqRZITm+PdWbm3d3FK9LhgVNbNGGO0T2JWiH7Ng3c/8S1NO/Xs1tYvIDKGLq9Y0jfuDlzKM81jnjOQGvgz7NpyAvOUc771FASmLohHRRWBeGo00IufuoxwcDm9jfx888NbJPVN0DPpMw6cINYHJmNsGt9JlaVGNW3jiadTUY+ZGzmaXf5Jvu0cp0aAua9Vqi7zlw0toqb7oE51WJjeG9bfZeE85Fe+HKI45vnK1dTLfa3gDKCmuXPgHy7eT39Qdx/sPolBlC43JOgWHd8i3THQA5gzkxnljmpsxN08G72XzEfLifkeeNTBxXF8="
+
+addons:
+  coverity_scan:
+    project:
+      name: "dhcgn/KeePass"
+      description: "Build submitted via Travis CI"
+    notification_email: dhcgn@mailbox.org
+    build_command_prepend: "msbuild /t:Clean"
+    build_command:   "msbuild /t:Rebuild"
+    branch_pattern: coverity_scan
