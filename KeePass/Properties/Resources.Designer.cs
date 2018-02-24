@@ -19,7 +19,7 @@ namespace KeePass.Properties {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -693,6 +693,16 @@ namespace KeePass.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap B16x16_Imp_Enpass {
+            get {
+                object obj = ResourceManager.GetObject("B16x16_Imp_Enpass", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap B16x16_Imp_FlexWallet {
             get {
                 object obj = ResourceManager.GetObject("B16x16_Imp_FlexWallet", resourceCulture);
@@ -746,6 +756,16 @@ namespace KeePass.Properties {
         internal static System.Drawing.Bitmap B16x16_Imp_LastPass {
             get {
                 object obj = ResourceManager.GetObject("B16x16_Imp_LastPass", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap B16x16_Imp_MSecure {
+            get {
+                object obj = ResourceManager.GetObject("B16x16_Imp_MSecure", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -866,6 +886,16 @@ namespace KeePass.Properties {
         internal static System.Drawing.Bitmap B16x16_Imp_PwSafe {
             get {
                 object obj = ResourceManager.GetObject("B16x16_Imp_PwSafe", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap B16x16_Imp_PwSaver {
+            get {
+                object obj = ResourceManager.GetObject("B16x16_Imp_PwSaver", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1473,6 +1503,16 @@ namespace KeePass.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap B48x35_WritingHand {
+            get {
+                object obj = ResourceManager.GetObject("B48x35_WritingHand", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap B48x48_Ark {
             get {
                 object obj = ResourceManager.GetObject("B48x48_Ark", resourceCulture);
@@ -1743,6 +1783,36 @@ namespace KeePass.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
         /// </summary>
+        internal static System.Drawing.Icon KeePass_G {
+            get {
+                object obj = ResourceManager.GetObject("KeePass_G", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon KeePass_R {
+            get {
+                object obj = ResourceManager.GetObject("KeePass_R", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon KeePass_Y {
+            get {
+                object obj = ResourceManager.GetObject("KeePass_Y", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
         internal static System.Drawing.Icon LockOverlay {
             get {
                 object obj = ResourceManager.GetObject("LockOverlay", resourceCulture);
@@ -1776,6 +1846,36 @@ namespace KeePass.Properties {
         internal static System.Drawing.Icon QuadNormal {
             get {
                 object obj = ResourceManager.GetObject("QuadNormal", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon QuadNormal_G {
+            get {
+                object obj = ResourceManager.GetObject("QuadNormal_G", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon QuadNormal_R {
+            get {
+                object obj = ResourceManager.GetObject("QuadNormal_R", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Icon ähnlich wie (Symbol).
+        /// </summary>
+        internal static System.Drawing.Icon QuadNormal_Y {
+            get {
+                object obj = ResourceManager.GetObject("QuadNormal_Y", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -300,19 +300,26 @@ namespace KeePassLib.Utility
 		}
 
 		/// <summary>
-		/// Convert a string into a valid HTML sequence representing that string.
+		/// Convert a string to a HTML sequence representing that string.
 		/// </summary>
 		/// <param name="str">String to convert.</param>
 		/// <returns>String, HTML-encoded.</returns>
 		public static string StringToHtml(string str)
 		{
+			return StringToHtml(str, false);
+		}
+
+		internal static string StringToHtml(string str, bool bNbsp)
+		{
 			Debug.Assert(str != null); if(str == null) throw new ArgumentNullException("str");
 
-			str = str.Replace(@"&", @"&amp;");
+			str = str.Replace(@"&", @"&amp;"); // Must be first
 			str = str.Replace(@"<", @"&lt;");
 			str = str.Replace(@">", @"&gt;");
 			str = str.Replace("\"", @"&quot;");
 			str = str.Replace("\'", @"&#39;");
+
+			if(bNbsp) str = str.Replace(" ", @"&nbsp;"); // Before <br />
 
 			str = NormalizeNewLines(str, false);
 			str = str.Replace("\n", @"<br />" + MessageService.NewLine);
@@ -669,7 +676,8 @@ namespace KeePassLib.Utility
 			return DateTime.TryParse(str, out dt);
 #else
 			try { dt = DateTime.Parse(str); return true; }
-			catch(Exception) { dt = DateTime.MinValue; return false; }
+			catch(Exception) { dt = DateTime.UtcNow; }
+			return false;
 #endif
 		}
 
@@ -718,7 +726,7 @@ namespace KeePassLib.Utility
 
 		/// <summary>
 		/// Removes all characters that are not valid XML characters,
-		/// according to http://www.w3.org/TR/xml/#charsets .
+		/// according to https://www.w3.org/TR/xml/#charsets .
 		/// </summary>
 		/// <param name="strText">Source text.</param>
 		/// <returns>Text containing only valid XML characters.</returns>
@@ -978,13 +986,12 @@ namespace KeePassLib.Utility
 		public static bool IsHexString(string str, bool bStrict)
 		{
 			if(str == null) throw new ArgumentNullException("str");
-			if(str.Length == 0) return true;
 
 			foreach(char ch in str)
 			{
 				if((ch >= '0') && (ch <= '9')) continue;
-				if((ch >= 'a') && (ch <= 'z')) continue;
-				if((ch >= 'A') && (ch <= 'Z')) continue;
+				if((ch >= 'a') && (ch <= 'f')) continue;
+				if((ch >= 'A') && (ch <= 'F')) continue;
 
 				if(bStrict) return false;
 
@@ -997,8 +1004,31 @@ namespace KeePassLib.Utility
 			return true;
 		}
 
+		public static bool IsHexString(byte[] pbUtf8, bool bStrict)
+		{
+			if(pbUtf8 == null) throw new ArgumentNullException("pbUtf8");
+
+			for(int i = 0; i < pbUtf8.Length; ++i)
+			{
+				byte bt = pbUtf8[i];
+				if((bt >= (byte)'0') && (bt <= (byte)'9')) continue;
+				if((bt >= (byte)'a') && (bt <= (byte)'f')) continue;
+				if((bt >= (byte)'A') && (bt <= (byte)'F')) continue;
+
+				if(bStrict) return false;
+
+				if((bt == (byte)' ') || (bt == (byte)'\t') ||
+					(bt == (byte)'\r') || (bt == (byte)'\n'))
+					continue;
+
+				return false;
+			}
+
+			return true;
+		}
+
 #if !KeePassLibSD
-		private static readonly char[] m_vPatternPartsSep = new char[]{ '*' };
+		private static readonly char[] m_vPatternPartsSep = new char[] { '*' };
 		public static bool SimplePatternMatch(string strPattern, string strText,
 			StringComparison sc)
 		{
@@ -1709,6 +1739,17 @@ namespace KeePassLib.Utility
 			}
 
 			return iCount;
+		}
+
+		internal static string ReplaceNulls(string str)
+		{
+			if(str == null) { Debug.Assert(false); return null; }
+
+			if(str.IndexOf('\0') < 0) return str;
+
+			// Replacing null characters by spaces is the
+			// behavior of Notepad (on Windows 10)
+			return str.Replace('\0', ' ');
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,6 +24,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
+using KeePass;
 
 using KeePassLib;
 using KeePassLib.Native;
@@ -80,32 +82,10 @@ namespace KeePass.UI
 			get { return m_ico; }
 			set
 			{
-				try
-				{
-					m_ico = value;
-					if(m_ntf == null) return;
+				if(value == m_ico) return; // Avoid small icon recreation
 
-					Icon icoToDispose = m_icoShell;
-					try
-					{
-						if(m_ico != null)
-						{
-							Size sz = SystemInformation.SmallIconSize;
-							m_icoShell = new Icon(m_ico, sz);
-
-							m_ntf.Icon = m_icoShell;
-						}
-						else m_ntf.Icon = null;
-					}
-					catch(Exception)
-					{
-						Debug.Assert(false);
-						m_ntf.Icon = m_ico;
-					}
-
-					if(icoToDispose != null) icoToDispose.Dispose();
-				}
-				catch(Exception) { Debug.Assert(false); }
+				m_ico = value;
+				RefreshShellIcon();
 			}
 		}
 
@@ -129,9 +109,14 @@ namespace KeePass.UI
 			try
 			{
 				bool bNtf = true;
-				DesktopType t = NativeLib.GetDesktopType();
-				if((t == DesktopType.Unity) || (t == DesktopType.Pantheon))
-					bNtf = !MonoWorkarounds.IsRequired(1354);
+				if(NativeLib.GetPlatformID() == PlatformID.MacOSX)
+					bNtf = !MonoWorkarounds.IsRequired(1574);
+				else
+				{
+					DesktopType t = NativeLib.GetDesktopType();
+					if((t == DesktopType.Unity) || (t == DesktopType.Pantheon))
+						bNtf = !MonoWorkarounds.IsRequired(1354);
+				}
 
 				if(bNtf) m_ntf = new NotifyIcon(container);
 			}
@@ -148,6 +133,48 @@ namespace KeePass.UI
 				if(ehClick != null) m_ntf.Click += ehClick;
 				if(ehDoubleClick != null) m_ntf.DoubleClick += ehDoubleClick;
 				if(ehMouseDown != null) m_ntf.MouseDown += ehMouseDown;
+			}
+			catch(Exception) { Debug.Assert(false); }
+		}
+
+		internal void RefreshShellIcon()
+		{
+			if(m_ntf == null) return;
+
+			try
+			{
+				Icon icoToDispose = m_icoShell;
+				try
+				{
+					if(m_ico != null)
+					{
+						Size sz = UIUtil.GetSmallIconSize();
+
+						if(Program.Config.UI.TrayIcon.GrayIcon)
+						{
+							using(Bitmap bmpOrg = UIUtil.IconToBitmap(m_ico,
+								sz.Width, sz.Height))
+							{
+								using(Bitmap bmpGray = UIUtil.CreateGrayImage(
+									bmpOrg))
+								{
+									m_icoShell = UIUtil.BitmapToIcon(bmpGray);
+								}
+							}
+						}
+						else m_icoShell = new Icon(m_ico, sz);
+
+						m_ntf.Icon = m_icoShell;
+					}
+					else m_ntf.Icon = null;
+				}
+				catch(Exception)
+				{
+					Debug.Assert(false);
+					m_ntf.Icon = m_ico;
+				}
+
+				if(icoToDispose != null) icoToDispose.Dispose();
 			}
 			catch(Exception) { Debug.Assert(false); }
 		}

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,15 +19,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
-using System.Text;
-using System.Windows.Forms;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 using Microsoft.Win32;
 
@@ -46,8 +47,6 @@ namespace KeePass.Util
 {
 	public static class WinUtil
 	{
-		private const int ERROR_ACCESS_DENIED = 5;
-
 		private static bool m_bIsWindows9x = false;
 		private static bool m_bIsWindows2000 = false;
 		private static bool m_bIsWindowsXP = false;
@@ -56,6 +55,7 @@ namespace KeePass.Util
 		private static bool m_bIsAtLeastWindows7 = false;
 		private static bool m_bIsAtLeastWindows8 = false;
 		private static bool m_bIsAtLeastWindows10 = false;
+		private static bool m_bIsAppX = false;
 
 		private static string m_strExePath = null;
 
@@ -101,6 +101,11 @@ namespace KeePass.Util
 			get { return m_bIsAtLeastWindows10; }
 		}
 
+		public static bool IsAppX
+		{
+			get { return m_bIsAppX; }
+		}
+
 		static WinUtil()
 		{
 			OperatingSystem os = Environment.OSVersion;
@@ -135,6 +140,19 @@ namespace KeePass.Util
 			}
 			catch(Exception) { Debug.Assert(NativeLib.IsUnix()); }
 			finally { if(rk != null) rk.Close(); }
+
+			try
+			{
+				string strDir = UrlUtil.GetFileDirectory(GetExecutable(), false, false);
+				if(strDir.IndexOf("\\WindowsApps\\", StrUtil.CaseIgnoreCmp) >= 0)
+				{
+					Regex rx = new Regex("\\\\WindowsApps\\\\.*?_\\d+(\\.\\d+)*_",
+						RegexOptions.IgnoreCase);
+					m_bIsAppX = rx.IsMatch(strDir);
+				}
+				else { Debug.Assert(!m_bIsAppX); } // No AppX by default
+			}
+			catch(Exception) { Debug.Assert(false); }
 		}
 
 		public static void OpenEntryUrl(PwEntry pe)
@@ -190,10 +208,10 @@ namespace KeePass.Util
 			}
 			catch(Exception) { Debug.Assert(false); }
 
-			bool bCmdQuotes = WinUtil.IsCommandLineUrl(strUrlFlt);
+			bool bEncCmd = WinUtil.IsCommandLineUrl(strUrlFlt);
 
 			SprContext ctx = new SprContext(peDataSource, pwDatabase,
-				SprCompileFlags.All, false, bCmdQuotes);
+				SprCompileFlags.All, false, bEncCmd);
 			ctx.Base = strBaseRaw;
 			ctx.BaseIsEncoded = false;
 
@@ -204,12 +222,12 @@ namespace KeePass.Util
 			if(!bAllowOverride) strOvr = null;
 			if(strOvr != null)
 			{
-				bool bCmdQuotesOvr = WinUtil.IsCommandLineUrl(strOvr);
+				bool bEncCmdOvr = WinUtil.IsCommandLineUrl(strOvr);
 
 				SprContext ctxOvr = new SprContext(peDataSource, pwDatabase,
-					SprCompileFlags.All, false, bCmdQuotesOvr);
+					SprCompileFlags.All, false, bEncCmdOvr);
 				ctxOvr.Base = strUrl;
-				ctxOvr.BaseIsEncoded = bCmdQuotes;
+				ctxOvr.BaseIsEncoded = bEncCmd;
 
 				strUrl = SprEngine.Compile(strOvr, ctxOvr);
 			}
@@ -479,8 +497,10 @@ namespace KeePass.Util
 			byte[] pbHash;
 			try
 			{
-				SHA256Managed sha256 = new SHA256Managed();
-				pbHash = sha256.ComputeHash(sIn);
+				using(SHA256Managed sha256 = new SHA256Managed())
+				{
+					pbHash = sha256.ComputeHash(sIn);
+				}
 			}
 			catch(Exception) { Debug.Assert(false); sIn.Close(); return null; }
 

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,13 +36,18 @@ namespace KeePass.App
 		public static readonly Color ColorControlDisabled = SystemColors.Control;
 		public static readonly Color ColorEditError = Color.FromArgb(255, 192, 192);
 
-		public const string XslFilesDir = "XSL";
-		public const string XslFileHtmlLite = "KDBX_DetailsLite.xsl";
-		public const string XslFileHtmlFull = "KDBX_DetailsFull.xsl";
-		public const string XslFileHtmlTabular = "KDBX_Tabular.xsl";
+		public static readonly Color ColorQualityLow = Color.FromArgb(255, 128, 0);
+		public static readonly Color ColorQualityHigh = Color.FromArgb(0, 255, 0);
+
+		public const string LanguagesDir = "Languages";
 
 		public const string PluginsDir = "Plugins";
 		public const string PluginProductName = "KeePass Plugin";
+
+		public const string XslFilesDir = "XSL";
+		public const string XslFileHtmlFull = "KDBX_DetailsFull_HTML.xsl";
+		public const string XslFileHtmlLight = "KDBX_DetailsLight_HTML.xsl";
+		public const string XslFileHtmlTabular = "KDBX_Tabular_HTML.xsl";
 
 		public static class FileNames
 		{
@@ -92,6 +97,9 @@ namespace KeePass.App
 			public const string EntryHistory = "history";
 
 			public const string KeySources = "base/keys";
+			public const string KeySourcesKeyFile = "keyfiles";
+			public const string KeySourcesUserAccount = "winuser";
+
 			public const string PwGenerator = "base/pwgenerator";
 			public const string IOConnections = "v2/ioconnect";
 			public const string UrlField = "base/autourl";
@@ -234,9 +242,23 @@ namespace KeePass.App
 		}
 
 		public const string DefaultTrlAuthor = "Dominik Reichl";
-		public const string DefaultTrlContact = @"http://www.dominik-reichl.de/";
+		public const string DefaultTrlContact = "https://www.dominik-reichl.de/";
 
 		// public const string LanguageInfoFileName = "LanguageInfo.xml";
+
+		internal const string Rsa4096PublicKeyXml =
+			@"<RSAKeyValue><Modulus>9Oa8Bb9if4rSYBxczLVQ3Yyae95dWQrNJ1FlqS7DoF" +
+			@"RF80tD2hq84vxDE8slVeSHs68KMFnJhPsXFD6nM9oTRBaUlU/alnRTUU+X/cUXbr" +
+			@"mhYN9DkJhM0OcWk5Vsl9Qxl613sA+hqIwmPc+el/fCM/1vP6JkHo/JTJ2OxQvDKN" +
+			@"4cC55pHYMZt+HX6AhemsPe7ejTG7l9nN5tHGmD+GrlwuxBTddzFBARmoknFzDPWd" +
+			@"QHddjuK1mXDs6lWeu73ODlSLSHMc5n0R2xMwGHN4eaiIMGzEbt0lv1aMWz+Iy1H3" +
+			@"XgFgWGDHX9kx8yefmfcgFIK4Y/xHU5EyGAV68ZHPatv6i4pT4ZuecIb5GSoFzVXq" +
+			@"8BZjbe+zDI+Wr1u8jLcBH0mySTWkF2gooQLvE1vgZXP1blsA7UFZSVFzYjBt36HQ" +
+			@"SJLpQ9AjjB5MKpMSlvdb5SnvjzREiFVLoBsY7KH2TMz+IG1Rh3OZTGwjQKXkgRVj" +
+			@"5XrEMTFRmT1zo2BHWhx8vrY6agVzqsCVqxYRbjeAhgOi6hLDMHSNAVuNg6ZHOKS8" +
+			@"6x6kmBcBhGJriwY017H3Oxuhfz33ehRFX/C05egCvmR2TAXbqm+CUgrq1bZ96T/y" +
+			@"s+O5uvKpe7H+EZuWb655Y9WuQSby+q0Vqqny7T6Z2NbEnI8nYHg5ZZP+TijSxeH0" +
+			@"8=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 
 		public const string ColumnIdnGroup = "Group";
 		public const string ColumnIdnCreationTime = "CreationTime";
@@ -260,8 +282,10 @@ namespace KeePass.App
 			else if(strFieldId == AppDefs.ColumnIdnLastAccessTime)
 				return TimeUtil.ToDisplayString(pe.LastAccessTime);
 			else if(strFieldId == AppDefs.ColumnIdnExpiryTime)
-				return (pe.Expires ? TimeUtil.ToDisplayString(pe.ExpiryTime) :
-					KPRes.NeverExpires);
+			{
+				if(!pe.Expires) return KPRes.NeverExpires;
+				return TimeUtil.ToDisplayString(pe.ExpiryTime);
+			}
 			else if(strFieldId == AppDefs.ColumnIdnUuid)
 				return pe.Uuid.ToHexString();
 			else if(strFieldId == AppDefs.ColumnIdnAttachment)
@@ -269,19 +293,5 @@ namespace KeePass.App
 
 			return pe.Strings.ReadSafe(strFieldId);
 		}
-
-		internal const string Rsa4096PublicKeyXml =
-			@"<RSAKeyValue><Modulus>9Oa8Bb9if4rSYBxczLVQ3Yyae95dWQrNJ1FlqS7DoF" +
-			@"RF80tD2hq84vxDE8slVeSHs68KMFnJhPsXFD6nM9oTRBaUlU/alnRTUU+X/cUXbr" +
-			@"mhYN9DkJhM0OcWk5Vsl9Qxl613sA+hqIwmPc+el/fCM/1vP6JkHo/JTJ2OxQvDKN" +
-			@"4cC55pHYMZt+HX6AhemsPe7ejTG7l9nN5tHGmD+GrlwuxBTddzFBARmoknFzDPWd" +
-			@"QHddjuK1mXDs6lWeu73ODlSLSHMc5n0R2xMwGHN4eaiIMGzEbt0lv1aMWz+Iy1H3" +
-			@"XgFgWGDHX9kx8yefmfcgFIK4Y/xHU5EyGAV68ZHPatv6i4pT4ZuecIb5GSoFzVXq" +
-			@"8BZjbe+zDI+Wr1u8jLcBH0mySTWkF2gooQLvE1vgZXP1blsA7UFZSVFzYjBt36HQ" +
-			@"SJLpQ9AjjB5MKpMSlvdb5SnvjzREiFVLoBsY7KH2TMz+IG1Rh3OZTGwjQKXkgRVj" +
-			@"5XrEMTFRmT1zo2BHWhx8vrY6agVzqsCVqxYRbjeAhgOi6hLDMHSNAVuNg6ZHOKS8" +
-			@"6x6kmBcBhGJriwY017H3Oxuhfz33ehRFX/C05egCvmR2TAXbqm+CUgrq1bZ96T/y" +
-			@"s+O5uvKpe7H+EZuWb655Y9WuQSby+q0Vqqny7T6Z2NbEnI8nYHg5ZZP+TijSxeH0" +
-			@"8=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
 	}
 }

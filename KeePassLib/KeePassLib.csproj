@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -17,7 +16,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -33,7 +32,6 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,7 +43,6 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\Build\KeePassLib\Debug\KeePassLib.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,7 +53,6 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>..\Build\KeePassLib\Release\KeePassLib.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -68,18 +64,32 @@
   <ItemGroup>
     <Compile Include="Collections\AutoTypeConfig.cs" />
     <Compile Include="Collections\ProtectedBinaryDictionary.cs" />
+    <Compile Include="Collections\ProtectedBinarySet.cs" />
     <Compile Include="Collections\ProtectedStringDictionary.cs" />
     <Compile Include="Collections\PwObjectList.cs" />
     <Compile Include="Collections\PwObjectPool.cs" />
     <Compile Include="Collections\StringDictionaryEx.cs" />
+    <Compile Include="Collections\VariantDictionary.cs" />
+    <Compile Include="Cryptography\Cipher\ChaCha20Cipher.cs" />
+    <Compile Include="Cryptography\Cipher\ChaCha20Engine.cs" />
     <Compile Include="Cryptography\Cipher\CipherPool.cs" />
+    <Compile Include="Cryptography\Cipher\CtrBlockCipher.cs" />
     <Compile Include="Cryptography\Cipher\Salsa20Cipher.cs" />
     <Compile Include="Cryptography\Cipher\StandardAesEngine.cs" />
     <Compile Include="Cryptography\CryptoRandom.cs" />
     <Compile Include="Cryptography\CryptoRandomStream.cs" />
     <Compile Include="Cryptography\Cipher\ICipherEngine.cs" />
+    <Compile Include="Cryptography\CryptoUtil.cs" />
     <Compile Include="Cryptography\HashingStreamEx.cs" />
+    <Compile Include="Cryptography\Hash\Blake2b.cs" />
     <Compile Include="Cryptography\HmacOtp.cs" />
+    <Compile Include="Cryptography\KeyDerivation\AesKdf.cs" />
+    <Compile Include="Cryptography\KeyDerivation\AesKdf.GCrypt.cs" />
+    <Compile Include="Cryptography\KeyDerivation\Argon2Kdf.Core.cs" />
+    <Compile Include="Cryptography\KeyDerivation\Argon2Kdf.cs" />
+    <Compile Include="Cryptography\KeyDerivation\KdfParameters.cs" />
+    <Compile Include="Cryptography\KeyDerivation\KdfPool.cs" />
+    <Compile Include="Cryptography\KeyDerivation\KdfEngine.cs" />
     <Compile Include="Cryptography\PasswordGenerator\CharSetBasedGenerator.cs" />
     <Compile Include="Cryptography\PasswordGenerator\CustomPwGenerator.cs" />
     <Compile Include="Cryptography\PasswordGenerator\CustomPwGeneratorPool.cs" />
@@ -98,6 +108,7 @@
     <Compile Include="Keys\KeyValidator.cs" />
     <Compile Include="Keys\KeyValidatorPool.cs" />
     <Compile Include="Keys\UserKeyType.cs" />
+    <Compile Include="Native\ClipboardU.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\NativeMethods.Unix.cs" />
     <Compile Include="PwCustomIcon.cs" />
@@ -127,6 +138,7 @@
     <Compile Include="Serialization\FileLock.cs" />
     <Compile Include="Serialization\FileTransactionEx.cs" />
     <Compile Include="Serialization\HashedBlockStream.cs" />
+    <Compile Include="Serialization\HmacBlockStream.cs" />
     <Compile Include="Serialization\IOConnection.cs">
       <SubType>Component</SubType>
     </Compile>

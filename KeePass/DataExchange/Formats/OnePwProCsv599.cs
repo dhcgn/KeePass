@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 using System.Diagnostics;
-using System.Globalization;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
+using System.Text;
 
 using KeePass.Resources;
 
@@ -34,7 +34,8 @@ using KeePassLib.Utility;
 
 namespace KeePass.DataExchange.Formats
 {
-	// 1Password Pro 5.99 and 1PW 6.15-7.05+
+	// 1PW 6.15-7.05+ and its predecessor 1Password Pro 5.99,
+	// not 1Password (which is an entirely different product)
 	internal sealed class OnePwProCsv599 : FileFormatProvider
 	{
 		public override bool SupportsImport { get { return true; } }
@@ -156,22 +157,22 @@ namespace KeePass.DataExchange.Formats
 			if(str.Trim().Equals("never", StrUtil.CaseIgnoreCmp)) return false;
 			if(str.Trim().Equals("morgen", StrUtil.CaseIgnoreCmp))
 			{
-				dt = DateTime.Now.AddDays(1.0);
+				dt = DateTime.UtcNow.AddDays(1.0);
 				return true;
 			}
 
-			string[] list = str.Split(new char[]{ '.', '\r', '\n', ' ', '\t',
+			string[] list = str.Split(new char[] { '.', '\r', '\n', ' ', '\t',
 				'-', ':' }, StringSplitOptions.RemoveEmptyEntries);
 
 			try
 			{
 				if(list.Length == 6)
-					dt = new DateTime(int.Parse(list[2]), int.Parse(list[1]),
+					dt = (new DateTime(int.Parse(list[2]), int.Parse(list[1]),
 						int.Parse(list[0]), int.Parse(list[3]), int.Parse(list[4]),
-						int.Parse(list[5]));
+						int.Parse(list[5]), DateTimeKind.Local)).ToUniversalTime();
 				else if(list.Length == 3)
-					dt = new DateTime(int.Parse(list[2]), int.Parse(list[1]),
-						int.Parse(list[0]));
+					dt = (new DateTime(int.Parse(list[2]), int.Parse(list[1]),
+						int.Parse(list[0]), 0, 0, 0, DateTimeKind.Local)).ToUniversalTime();
 				else { Debug.Assert(false); return false; }
 			}
 			catch(Exception) { Debug.Assert(false); return false; }

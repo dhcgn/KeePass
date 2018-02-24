@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -107,6 +107,8 @@ namespace KeePass.Util
 		private static Dictionary<string, string> g_dFileSigKeys =
 			new Dictionary<string, string>();
 
+		private const string CompMain = PwDefs.ShortProductName;
+
 		private sealed class UpdateCheckParams
 		{
 			public readonly bool ForceUI;
@@ -121,7 +123,7 @@ namespace KeePass.Util
 
 		public static void Run(bool bForceUI, Form fOptParent)
 		{
-			DateTime dtNow = DateTime.Now, dtLast;
+			DateTime dtNow = DateTime.UtcNow, dtLast;
 			string strLast = Program.Config.Application.LastUpdateCheck;
 			if(!bForceUI && (strLast.Length > 0) && TimeUtil.TryDeserializeUtc(
 				strLast, out dtLast))
@@ -150,6 +152,7 @@ namespace KeePass.Util
 
 		private static int CompareDates(DateTime a, DateTime b)
 		{
+			Debug.Assert(a.Kind == b.Kind);
 			if(a.Year != b.Year) return ((a.Year < b.Year) ? -1 : 1);
 			if(a.Month != b.Month) return ((a.Month < b.Month) ? -1 : 1);
 			if(a.Day != b.Day) return ((a.Day < b.Day) ? -1 : 1);
@@ -237,7 +240,7 @@ namespace KeePass.Util
 		private sealed class UpdateDownloadInfo
 		{
 			public readonly string Url; // Never null
-			public object SyncObj = new object();
+			public readonly object SyncObj = new object();
 			public bool Ready = false;
 			public List<UpdateComponentInfo> ComponentInfo = null;
 
@@ -460,9 +463,9 @@ namespace KeePass.Util
 			}
 
 			// Add KeePass at the end to override any buggy plugin names
-			AddComponent(l, new UpdateComponentInfo(PwDefs.ShortProductName,
-				PwDefs.FileVersion64, PwDefs.VersionUrl, PwDefs.ShortProductName));
-			
+			AddComponent(l, new UpdateComponentInfo(CompMain, PwDefs.FileVersion64,
+				PwDefs.VersionUrl, PwDefs.ShortProductName));
+
 			l.Sort(UpdateCheckEx.CompareComponents);
 			return l;
 		}
@@ -471,8 +474,8 @@ namespace KeePass.Util
 			UpdateComponentInfo b)
 		{
 			if(a.Name == b.Name) return 0;
-			if(a.Name == PwDefs.ShortProductName) return -1;
-			if(b.Name == PwDefs.ShortProductName) return 1;
+			if(a.Name == CompMain) return -1;
+			if(b.Name == CompMain) return 1;
 
 			return a.Name.CompareTo(b.Name);
 		}
@@ -503,6 +506,15 @@ namespace KeePass.Util
 		{
 			if(uc == null) { Debug.Assert(false); return false; }
 			if(lAvail == null) return false; // No assert
+
+			if((uc.Name == CompMain) && WinUtil.IsAppX)
+			{
+				// The user's AppX may be old; do not claim it's up-to-date
+				// uc.VerAvailable = uc.VerInstalled;
+				// uc.Status = UpdateComponentStatus.UpToDate;
+				uc.Status = UpdateComponentStatus.Unknown;
+				return true;
+			}
 
 			foreach(UpdateComponentInfo ucAvail in lAvail)
 			{
@@ -598,8 +610,8 @@ namespace KeePass.Util
 				else
 				{
 					string strMain = strHdr + MessageService.NewParagraph + strSub;
-					iResult = (MessageService.AskYesNo(strMain + MessageService.NewParagraph +
-						KPRes.UpdateCheckEnableQ, PwDefs.ShortProductName) ?
+					iResult = (MessageService.AskYesNo(strMain +
+						MessageService.NewParagraph + KPRes.UpdateCheckEnableQ) ?
 						(int)DialogResult.Yes : (int)DialogResult.No);
 				}
 

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,11 +20,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
 
+using KeePass.App;
 using KeePass.Plugins;
 using KeePass.Resources;
 using KeePass.UI;
@@ -64,9 +66,19 @@ namespace KeePass.Forms
 			BannerFactory.CreateBannerEx(this, m_bannerImage,
 				Properties.Resources.B48x48_BlockDevice, KPRes.Plugins,
 				KPRes.PluginsDesc);
-			this.Icon = Properties.Resources.KeePass;
+			this.Icon = AppIcons.Default;
+
+			Debug.Assert(!m_lblCacheSize.AutoSize); // For RTL support
+			m_lblCacheSize.Text += " " + StrUtil.FormatDataSize(
+				PlgxCache.GetUsedCacheSize()) + ".";
 
 			m_cbCacheDeleteOld.Checked = Program.Config.Application.Start.PluginCacheDeleteOld;
+
+			if(string.IsNullOrEmpty(PluginManager.UserDirectory))
+			{
+				Debug.Assert(false);
+				m_btnOpenFolder.Enabled = false;
+			}
 
 			m_lvPlugins.Columns.Add(KPRes.Plugin);
 			m_lvPlugins.Columns.Add(KPRes.Version);
@@ -79,13 +91,9 @@ namespace KeePass.Forms
 			m_ilIcons.ImageSize = new Size(DpiUtil.ScaleIntX(16),
 				DpiUtil.ScaleIntY(16));
 			m_ilIcons.ColorDepth = ColorDepth.Depth32Bit;
-
-			m_lblCacheSize.Text += " " + StrUtil.FormatDataSize(
-				PlgxCache.GetUsedCacheSize()) + ".";
-
 			m_lvPlugins.SmallImageList = m_ilIcons;
-			UpdatePluginsList();
 
+			UpdatePluginsList();
 			if(m_lvPlugins.Items.Count > 0)
 			{
 				m_lvPlugins.Items[0].Selected = true;
@@ -142,6 +150,8 @@ namespace KeePass.Forms
 
 		private void UpdatePluginDescription()
 		{
+			Debug.Assert(!m_lblSelectedPluginDesc.AutoSize); // For RTL support
+
 			ListView.SelectedListViewItemCollection lvsic = m_lvPlugins.SelectedItems;
 			if(lvsic.Count == 0)
 			{
@@ -164,11 +174,6 @@ namespace KeePass.Forms
 			UpdatePluginDescription();
 		}
 
-		private void OnPluginsLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			WinUtil.OpenUrl(PwDefs.PluginsUrl, null);
-		}
-
 		private void OnFormClosed(object sender, FormClosedEventArgs e)
 		{
 			CleanUpEx();
@@ -186,6 +191,25 @@ namespace KeePass.Forms
 		{
 			Program.Config.Application.Start.PluginCacheDeleteOld =
 				m_cbCacheDeleteOld.Checked;
+		}
+
+		private void OnBtnGetMore(object sender, EventArgs e)
+		{
+			WinUtil.OpenUrl(PwDefs.PluginsUrl, null);
+		}
+
+		private void OnBtnOpenFolder(object sender, EventArgs e)
+		{
+			try
+			{
+				string str = PluginManager.UserDirectory;
+				if(string.IsNullOrEmpty(str)) { Debug.Assert(false); return; }
+
+				if(!Directory.Exists(str)) Directory.CreateDirectory(str);
+
+				WinUtil.OpenUrl("cmd://\"" + str + "\"", null, false);
+			}
+			catch(Exception ex) { MessageService.ShowWarning(ex.Message); }
 		}
 	}
 }

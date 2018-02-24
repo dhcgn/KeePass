@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace KeePassLib.Cryptography.Cipher
 		private const PaddingMode m_rCipherPadding = PaddingMode.PKCS7;
 #endif
 
-		private static PwUuid m_uuidAes = null;
+		private static PwUuid g_uuidAes = null;
 
 		/// <summary>
 		/// UUID of the cipher engine. This ID uniquely identifies the
@@ -52,12 +52,16 @@ namespace KeePassLib.Cryptography.Cipher
 		{
 			get
 			{
-				if(m_uuidAes == null)
-					m_uuidAes = new PwUuid(new byte[]{
+				PwUuid pu = g_uuidAes;
+				if(pu == null)
+				{
+					pu = new PwUuid(new byte[] {
 						0x31, 0xC1, 0xF2, 0xE6, 0xBF, 0x71, 0x43, 0x50,
 						0xBE, 0x58, 0x05, 0x21, 0x6A, 0xFC, 0x5A, 0xFF });
+					g_uuidAes = pu;
+				}
 
-				return m_uuidAes;
+				return pu;
 			}
 		}
 
@@ -72,7 +76,14 @@ namespace KeePassLib.Cryptography.Cipher
 		/// <summary>
 		/// Get a displayable name describing this cipher engine.
 		/// </summary>
-		public string DisplayName { get { return KLRes.EncAlgorithmAes; } }
+		public string DisplayName
+		{
+			get
+			{
+				return ("AES/Rijndael (" + KLRes.KeyBits.Replace(@"{PARAM}",
+					"256") + ", FIPS 197)");
+			}
+		}
 
 		private static void ValidateArguments(Stream stream, bool bEncrypt, byte[] pbKey, byte[] pbIV)
 		{
@@ -111,22 +122,22 @@ namespace KeePassLib.Cryptography.Cipher
 #if KeePassUAP
 			return StandardAesEngineExt.CreateStream(s, bEncrypt, pbLocalKey, pbLocalIV);
 #else
-			RijndaelManaged r = new RijndaelManaged();
-			if(r.BlockSize != 128) // AES block size
+			SymmetricAlgorithm a = CryptoUtil.CreateAes();
+			if(a.BlockSize != 128) // AES block size
 			{
 				Debug.Assert(false);
-				r.BlockSize = 128;
+				a.BlockSize = 128;
 			}
 
-			r.IV = pbLocalIV;
-			r.KeySize = 256;
-			r.Key = pbLocalKey;
-			r.Mode = m_rCipherMode;
-			r.Padding = m_rCipherPadding;
+			a.IV = pbLocalIV;
+			a.KeySize = 256;
+			a.Key = pbLocalKey;
+			a.Mode = m_rCipherMode;
+			a.Padding = m_rCipherPadding;
 
-			ICryptoTransform iTransform = (bEncrypt ? r.CreateEncryptor() : r.CreateDecryptor());
+			ICryptoTransform iTransform = (bEncrypt ? a.CreateEncryptor() : a.CreateDecryptor());
 			Debug.Assert(iTransform != null);
-			if(iTransform == null) throw new SecurityException("Unable to create Rijndael transform!");
+			if(iTransform == null) throw new SecurityException("Unable to create AES transform!");
 
 			return new CryptoStream(s, iTransform, bEncrypt ? CryptoStreamMode.Write :
 				CryptoStreamMode.Read);

@@ -1,6 +1,6 @@
 /*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,16 +20,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
 
 using KeePass.App;
 using KeePass.App.Configuration;
+using KeePass.Resources;
 using KeePass.UI;
 using KeePass.UI.ToolStripRendering;
-using KeePass.Resources;
 using KeePass.Util;
 
 using KeePassLib;
@@ -56,6 +56,8 @@ namespace KeePass.Forms
 		private CheckedLVItemDXList m_cdxAdvanced = null;
 
 		private Dictionary<int, string> m_dTsrUuids = new Dictionary<int, string>();
+		private int m_argbAltItemBg = 0;
+		private Image m_imgAltItemBg = null;
 
 		private HotKeyControlEx m_hkGlobalAutoType = null;
 		private HotKeyControlEx m_hkSelectedAutoType = null;
@@ -119,7 +121,7 @@ namespace KeePass.Forms
 
 			GlobalWindowManager.AddWindow(this);
 
-			this.Icon = Properties.Resources.KeePass;
+			this.Icon = AppIcons.Default;
 
 			Debug.Assert(m_ilIcons != null);
 			if(m_ilIcons != null)
@@ -390,8 +392,6 @@ namespace KeePass.Forms
 
 			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "MinimizeToTray",
 				lvg, KPRes.MinimizeToTray);
-			m_cdxGuiOptions.CreateItem(Program.Config.UI.TrayIcon, "ShowOnlyIfTrayed",
-				lvg, KPRes.ShowTrayOnlyIfTrayed);
 			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "DropToBackAfterClipboardCopy",
 				lvg, KPRes.DropToBackOnCopy);
 			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "MinimizeAfterClipboardCopy",
@@ -408,6 +408,10 @@ namespace KeePass.Forms
 				lvg, KPRes.ShowFullPathInTitleBar);
 			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "DisableSaveIfNotModified",
 				lvg, KPRes.DisableSaveIfNotModified);
+			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "HideCloseDatabaseButton",
+				lvg, KPRes.HideCloseDatabaseTb);
+			m_cdxGuiOptions.CreateItem(Program.Config.UI, "ShowAdvAutoTypeCommands",
+				lvg, KPRes.ShowAdvAutoTypeCommands);
 
 			lvg = new ListViewGroup(KPRes.EntryList);
 			m_lvGuiOptions.Groups.Add(lvg);
@@ -459,12 +463,23 @@ namespace KeePass.Forms
 			m_cdxGuiOptions.CreateItem(Program.Config.MainWindow, "FocusQuickFindOnUntray",
 				lvg, KPRes.FocusQuickFindOnUntray);
 
+			lvg = new ListViewGroup(KPRes.TrayIcon);
+			m_lvGuiOptions.Groups.Add(lvg);
+			m_cdxGuiOptions.CreateItem(Program.Config.UI.TrayIcon, "ShowOnlyIfTrayed",
+				lvg, KPRes.ShowTrayOnlyIfTrayed);
+			m_cdxGuiOptions.CreateItem(Program.Config.UI.TrayIcon, "GrayIcon",
+				lvg, KPRes.TrayIconGray);
+			m_cdxGuiOptions.CreateItem(Program.Config.UI.TrayIcon, "SingleClickDefault",
+				lvg, KPRes.TrayIconSingleClick);
+
 			lvg = new ListViewGroup(KPRes.Dialogs);
 			m_lvGuiOptions.Groups.Add(lvg);
 			m_cdxGuiOptions.CreateItem(Program.Config.UI, "ShowRecycleConfirmDialog",
 				lvg, KPRes.RecycleShowConfirm);
 			m_cdxGuiOptions.CreateItem(Program.Config.UI, "ShowDbMntncResultsDialog",
 				lvg, KPRes.DbMntncResults);
+			m_cdxGuiOptions.CreateItem(Program.Config.UI, "ShowEmSheetDialog",
+				lvg, KPRes.EmergencySheetAsk);
 
 			lvg = new ListViewGroup(KPRes.Advanced);
 			m_lvGuiOptions.Groups.Add(lvg);
@@ -485,6 +500,10 @@ namespace KeePass.Forms
 				m_lblMruCount.Enabled = false;
 				m_numMruCount.Enabled = false;
 			}
+
+			m_argbAltItemBg = Program.Config.MainWindow.EntryListAlternatingBgColor;
+			m_cbCustomAltColor.Checked = (m_argbAltItemBg != 0);
+			UpdateButtonImages();
 
 			if(AppConfigEx.IsOptionEnforced(Program.Config.UI, "StandardFont"))
 				m_btnSelFont.Enabled = false;
@@ -521,9 +540,9 @@ namespace KeePass.Forms
 
 			m_cbAutoRun.Checked = ShellUtil.GetStartWithWindows(AppDefs.AutoRunName);
 
-			m_cbSingleClickTrayAction.Checked = Program.Config.UI.TrayIcon.SingleClickDefault;
-			if(AppConfigEx.IsOptionEnforced(Program.Config.UI.TrayIcon, "SingleClickDefault"))
-				m_cbSingleClickTrayAction.Enabled = false;
+			// m_cbSingleClickTrayAction.Checked = Program.Config.UI.TrayIcon.SingleClickDefault;
+			// if(AppConfigEx.IsOptionEnforced(Program.Config.UI.TrayIcon, "SingleClickDefault"))
+			//	m_cbSingleClickTrayAction.Enabled = false;
 		}
 
 		private void LoadAdvancedOptions()
@@ -706,6 +725,9 @@ namespace KeePass.Forms
 			Program.Config.Application.MostRecentlyUsed.MaxItemCount =
 				(uint)m_numMruCount.Value;
 
+			Program.Config.MainWindow.EntryListAlternatingBgColor =
+				(m_cbCustomAltColor.Checked ? m_argbAltItemBg : 0);
+
 			ChangeHotKey(ref m_kPrevATHKKey, m_hkGlobalAutoType,
 				AppDefs.GlobalHotKeyId.AutoType);
 			ChangeHotKey(ref m_kPrevATSHKKey, m_hkSelectedAutoType,
@@ -713,7 +735,7 @@ namespace KeePass.Forms
 			ChangeHotKey(ref m_kPrevSWHKKey, m_hkShowWindow,
 				AppDefs.GlobalHotKeyId.ShowWindow);
 
-			Program.Config.UI.TrayIcon.SingleClickDefault = m_cbSingleClickTrayAction.Checked;
+			// Program.Config.UI.TrayIcon.SingleClickDefault = m_cbSingleClickTrayAction.Checked;
 
 			Program.Config.Integration.UrlSchemeOverrides = m_aceUrlSchemeOverrides;
 			Program.Config.Integration.UrlOverride = m_strUrlOverrideAll;
@@ -730,6 +752,8 @@ namespace KeePass.Forms
 				Program.Config.Defaults.OptionsTabIndex = (uint)nTab;
 
 			m_tabMain.ImageList = null; // Detach event handlers
+
+			UIUtil.DisposeButtonImage(m_btnCustomAltColor, ref m_imgAltItemBg);
 
 			m_cdxSecurityOptions.Release();
 			m_cdxPolicy.Release();
@@ -782,6 +806,8 @@ namespace KeePass.Forms
 				m_cbDefaultExpireDays.Enabled);
 			m_numClipClearTime.Enabled = (m_cbClipClearTime.Checked &&
 				m_cbClipClearTime.Enabled);
+
+			m_btnCustomAltColor.Enabled = m_cbCustomAltColor.Checked;
 
 			m_bBlockUIUpdate = false;
 		}
@@ -939,6 +965,35 @@ namespace KeePass.Forms
 		{
 			ProxyForm dlg = new ProxyForm();
 			UIUtil.ShowDialogAndDestroy(dlg);
+		}
+
+		private void UpdateButtonImages()
+		{
+			if(m_argbAltItemBg != 0)
+			{
+				Color clr = Color.FromArgb(m_argbAltItemBg);
+				Image imgNew = UIUtil.CreateColorBitmap24(m_btnCustomAltColor, clr);
+				UIUtil.OverwriteButtonImage(m_btnCustomAltColor, ref m_imgAltItemBg,
+					imgNew);
+			}
+		}
+
+		private void OnCustomAltColorCheckedChanged(object sender, EventArgs e)
+		{
+			UpdateUIState();
+		}
+
+		private void OnBtnCustomAltColor(object sender, EventArgs e)
+		{
+			Color clrCur = UIUtil.GetAlternateColor(m_lvGuiOptions.BackColor);
+			if(m_argbAltItemBg != 0) clrCur = Color.FromArgb(m_argbAltItemBg);
+
+			Color? clr = UIUtil.ShowColorDialog(clrCur);
+			if(clr.HasValue)
+			{
+				m_argbAltItemBg = clr.Value.ToArgb();
+				UpdateButtonImages();
+			}
 		}
 	}
 }

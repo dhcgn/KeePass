@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -51,20 +51,29 @@ namespace KeePass.DataExchange.Formats
 		public override bool Export(PwExportInfo pwExportInfo, Stream sOutput,
 			IStatusLogger slLogger)
 		{
+			ImageList il = null;
+			MainForm mf = Program.MainForm;
+			if((mf != null) && (mf.ActiveDatabase == pwExportInfo.ContextDatabase))
+				il = mf.ClientIcons;
+
 			PrintForm dlg = new PrintForm();
-			dlg.InitEx(pwExportInfo.DataGroup, false, -1);
+			dlg.InitEx(pwExportInfo.DataGroup, pwExportInfo.ContextDatabase, il,
+				false, -1);
 
 			bool bResult = false;
-			if(dlg.ShowDialog() == DialogResult.OK)
+			try
 			{
-				byte[] pb = StrUtil.Utf8.GetBytes(dlg.GeneratedHtml);
-				sOutput.Write(pb, 0, pb.Length);
-				sOutput.Close();
+				if(dlg.ShowDialog() == DialogResult.OK)
+				{
+					byte[] pb = StrUtil.Utf8.GetBytes(dlg.GeneratedHtml);
+					sOutput.Write(pb, 0, pb.Length);
+					sOutput.Close();
 
-				bResult = true;
+					bResult = true;
+				}
 			}
+			finally { UIUtil.DestroyForm(dlg); }
 
-			UIUtil.DestroyForm(dlg);
 			return bResult;
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿/*
   KeePass Password Safe - The Open-Source Password Manager
-  Copyright (C) 2003-2016 Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2003-2018 Dominik Reichl <dominik.reichl@t-online.de>
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,23 +18,29 @@
 */
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
-
-using KeePass.Native;
 
 namespace KeePass.UI
 {
-	public sealed class UserActivityNotifyFilter : IMessageFilter
+	public sealed class CustomContextMenuEx : ContextMenu
 	{
-		public bool PreFilterMessage(ref Message m)
-		{
-			if((m.Msg == NativeMethods.WM_KEYDOWN) || (m.Msg == NativeMethods.WM_LBUTTONDOWN) ||
-				(m.Msg == NativeMethods.WM_RBUTTONDOWN) || (m.Msg == NativeMethods.WM_MBUTTONDOWN))
-			{
-				Program.NotifyUserActivity();
-			}
+		public CustomContextMenuEx() : base() { }
 
-			return false;
+		public void ShowEx(Control cParent)
+		{
+			if(cParent == null) { Debug.Assert(false); return; }
+
+			if(cParent.RightToLeft == RightToLeft.Yes)
+			{
+				this.RightToLeft = RightToLeft.Yes;
+				Show(cParent, new Point(cParent.Width, cParent.Height),
+					LeftRightAlignment.Left);
+			}
+			else Show(cParent, new Point(0, cParent.Height));
 		}
 	}
 }

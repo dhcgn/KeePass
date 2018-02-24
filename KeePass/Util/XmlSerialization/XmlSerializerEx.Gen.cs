@@ -149,6 +149,12 @@ namespace KeePass.Util.XmlSerialization
 					case "OmitItemsWithDefaultValues":
 						o.OmitItemsWithDefaultValues = ReadBoolean(xr);
 						break;
+					case "DpiFactorX":
+						o.DpiFactorX = ReadDouble(xr);
+						break;
+					case "DpiFactorY":
+						o.DpiFactorY = ReadDouble(xr);
+						break;
 					default:
 						Debug.Assert(false);
 						xr.Skip();
@@ -231,6 +237,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "PluginCachePath":
 						o.PluginCachePath = ReadString(xr);
+						break;
+					case "ExpirySoonDays":
+						o.ExpirySoonDays = ReadInt32(xr);
 						break;
 					default:
 						Debug.Assert(false);
@@ -377,6 +386,9 @@ namespace KeePass.Util.XmlSerialization
 					case "DisableSaveIfNotModified":
 						o.DisableSaveIfNotModified = ReadBoolean(xr);
 						break;
+					case "HideCloseDatabaseButton":
+						o.HideCloseDatabaseButton = ReadBoolean(xr);
+						break;
 					case "ToolBar":
 						o.ToolBar = ReadAceToolBar(xr);
 						break;
@@ -397,6 +409,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "EntryListAlternatingBgColors":
 						o.EntryListAlternatingBgColors = ReadBoolean(xr);
+						break;
+					case "EntryListAlternatingBgColor":
+						o.EntryListAlternatingBgColor = ReadInt32(xr);
 						break;
 					case "EntryListShowDerefData":
 						o.EntryListShowDerefData = ReadBoolean(xr);
@@ -478,11 +493,17 @@ namespace KeePass.Util.XmlSerialization
 					case "ShowRecycleConfirmDialog":
 						o.ShowRecycleConfirmDialog = ReadBoolean(xr);
 						break;
+					case "ShowEmSheetDialog":
+						o.ShowEmSheetDialog = ReadBoolean(xr);
+						break;
 					case "ToolStripRenderer":
 						o.ToolStripRenderer = ReadString(xr);
 						break;
 					case "OptimizeForScreenReader":
 						o.OptimizeForScreenReader = ReadBoolean(xr);
+						break;
+					case "DataViewerRect":
+						o.DataViewerRect = ReadString(xr);
 						break;
 					case "DataEditorRect":
 						o.DataEditorRect = ReadString(xr);
@@ -513,6 +534,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "KeyPromptFlags":
 						o.KeyPromptFlags = ReadUInt64(xr);
+						break;
+					case "ShowAdvAutoTypeCommands":
+						o.ShowAdvAutoTypeCommands = ReadBoolean(xr);
 						break;
 					case "SecureDesktopPlaySound":
 						o.SecureDesktopPlaySound = ReadBoolean(xr);
@@ -563,6 +587,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "MasterKeyOnSecureDesktop":
 						o.MasterKeyOnSecureDesktop = ReadBoolean(xr);
+						break;
+					case "MasterKeyExpiryRec":
+						o.MasterKeyExpiryRec = ReadString(xr);
 						break;
 					case "ClipboardClearOnExit":
 						o.ClipboardClearOnExit = ReadBoolean(xr);
@@ -770,6 +797,9 @@ namespace KeePass.Util.XmlSerialization
 					case "HotKeyEntryMenu":
 						o.HotKeyEntryMenu = ReadUInt64(xr);
 						break;
+					case "CheckHotKeys":
+						o.CheckHotKeys = ReadBoolean(xr);
+						break;
 					case "UrlOverride":
 						o.UrlOverride = ReadString(xr);
 						break;
@@ -823,6 +853,9 @@ namespace KeePass.Util.XmlSerialization
 						break;
 					case "AutoTypeInterKeyDelay":
 						o.AutoTypeInterKeyDelay = ReadInt32(xr);
+						break;
+					case "AutoTypeAbortOnWindows":
+						o.AutoTypeAbortOnWindows = ReadListOfString(xr);
 						break;
 					case "ProxyType":
 						o.ProxyType = ReadProxyServerType(xr);
@@ -1011,6 +1044,12 @@ namespace KeePass.Util.XmlSerialization
 		{
 			string strValue = xr.ReadElementString();
 			return XmlConvert.ToBoolean(strValue);
+		}
+
+		private static System.Double ReadDouble(XmlReader xr)
+		{
+			string strValue = xr.ReadElementString();
+			return XmlConvert.ToDouble(strValue);
 		}
 
 		private static KeePassLib.Serialization.IOConnectionInfo ReadIOConnectionInfo(XmlReader xr)
@@ -1295,12 +1334,6 @@ namespace KeePass.Util.XmlSerialization
 			return XmlConvert.ToInt32(strValue);
 		}
 
-		private static System.Double ReadDouble(XmlReader xr)
-		{
-			string strValue = xr.ReadElementString();
-			return XmlConvert.ToDouble(strValue);
-		}
-
 		private static Dictionary<string, KeePass.App.Configuration.AceMainWindowLayout> m_dictAceMainWindowLayout = null;
 		private static KeePass.App.Configuration.AceMainWindowLayout ReadAceMainWindowLayout(XmlReader xr)
 		{
@@ -1517,6 +1550,9 @@ namespace KeePass.Util.XmlSerialization
 				{
 					case "ShowOnlyIfTrayed":
 						o.ShowOnlyIfTrayed = ReadBoolean(xr);
+						break;
+					case "GrayIcon":
+						o.GrayIcon = ReadBoolean(xr);
 						break;
 					case "SingleClickDefault":
 						o.SingleClickDefault = ReadBoolean(xr);
@@ -1981,14 +2017,17 @@ namespace KeePass.Util.XmlSerialization
 					case "SearchInOther":
 						o.SearchInOther = ReadBoolean(xr);
 						break;
+					case "SearchInStringNames":
+						o.SearchInStringNames = ReadBoolean(xr);
+						break;
+					case "SearchInTags":
+						o.SearchInTags = ReadBoolean(xr);
+						break;
 					case "SearchInUuids":
 						o.SearchInUuids = ReadBoolean(xr);
 						break;
 					case "SearchInGroupNames":
 						o.SearchInGroupNames = ReadBoolean(xr);
-						break;
-					case "SearchInTags":
-						o.SearchInTags = ReadBoolean(xr);
 						break;
 					case "ComparisonMode":
 						o.ComparisonMode = ReadStringComparison(xr);
@@ -2072,6 +2111,33 @@ namespace KeePass.Util.XmlSerialization
 						xr.Skip();
 						break;
 				}
+
+				xr.MoveToContent();
+			}
+
+			Debug.Assert(xr.NodeType == XmlNodeType.EndElement);
+			xr.ReadEndElement();
+			return o;
+		}
+
+		private static System.Collections.Generic.List<System.String> ReadListOfString(XmlReader xr)
+		{
+			System.Collections.Generic.List<System.String> o = new System.Collections.Generic.List<System.String>();
+
+			if(SkipEmptyElement(xr)) return o;
+
+			Debug.Assert(xr.NodeType == XmlNodeType.Element);
+			xr.ReadStartElement();
+			xr.MoveToContent();
+
+			while(true)
+			{
+				XmlNodeType nt = xr.NodeType;
+				if((nt == XmlNodeType.EndElement) || (nt == XmlNodeType.None)) break;
+				if(nt != XmlNodeType.Element) { Debug.Assert(false); continue; }
+
+				System.String oElem = ReadString(xr);
+				o.Add(oElem);
 
 				xr.MoveToContent();
 			}
@@ -2520,6 +2586,9 @@ namespace KeePass.Util.XmlSerialization
 					case "DatabasePath":
 						o.DatabasePath = ReadString(xr);
 						break;
+					case "Password":
+						o.Password = ReadBoolean(xr);
+						break;
 					case "KeyFilePath":
 						o.KeyFilePath = ReadString(xr);
 						break;
@@ -2762,6 +2831,7 @@ namespace KeePass.Util.XmlSerialization
 				m_dictAceColumnType["Size"] = KeePass.App.Configuration.AceColumnType.Size;
 				m_dictAceColumnType["HistoryCount"] = KeePass.App.Configuration.AceColumnType.HistoryCount;
 				m_dictAceColumnType["AttachmentCount"] = KeePass.App.Configuration.AceColumnType.AttachmentCount;
+				m_dictAceColumnType["LastPasswordModTime"] = KeePass.App.Configuration.AceColumnType.LastPasswordModTime;
 				m_dictAceColumnType["Count"] = KeePass.App.Configuration.AceColumnType.Count;
 			}
 
@@ -3089,33 +3159,6 @@ namespace KeePass.Util.XmlSerialization
 						xr.Skip();
 						break;
 				}
-
-				xr.MoveToContent();
-			}
-
-			Debug.Assert(xr.NodeType == XmlNodeType.EndElement);
-			xr.ReadEndElement();
-			return o;
-		}
-
-		private static System.Collections.Generic.List<System.String> ReadListOfString(XmlReader xr)
-		{
-			System.Collections.Generic.List<System.String> o = new System.Collections.Generic.List<System.String>();
-
-			if(SkipEmptyElement(xr)) return o;
-
-			Debug.Assert(xr.NodeType == XmlNodeType.Element);
-			xr.ReadStartElement();
-			xr.MoveToContent();
-
-			while(true)
-			{
-				XmlNodeType nt = xr.NodeType;
-				if((nt == XmlNodeType.EndElement) || (nt == XmlNodeType.None)) break;
-				if(nt != XmlNodeType.Element) { Debug.Assert(false); continue; }
-
-				System.String oElem = ReadString(xr);
-				o.Add(oElem);
 
 				xr.MoveToContent();
 			}
